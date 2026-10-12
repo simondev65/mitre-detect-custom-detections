@@ -1,0 +1,26 @@
+# Push to main: compile, test, write the custom lookups on the Leader, commit and deploy.
+# Repository secrets: CRIBL_CLIENT_ID, CRIBL_CLIENT_SECRET. Variables: CRIBL_API_URL, CRIBL_GROUP.
+# Set the source's sync mode to "CI" in the app so the app only watches and never applies.
+name: sync detections
+on:
+  push:
+    branches: [main]
+    paths: ['rules/**', 'tests/**', 'mitre-detect.yml']
+  workflow_dispatch: {}
+concurrency: { group: mitre-detect-sync, cancel-in-progress: false }
+jobs:
+  sync:
+    # Skipped until the repository variable CRIBL_API_URL is set.
+    if: vars.CRIBL_API_URL != ''
+    runs-on: ubuntu-latest
+    environment: cribl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npx --yes mitre-detect-sync@1 apply --repo . --group "$CRIBL_GROUP" --deploy
+        env:
+          CRIBL_API_URL: ${{ vars.CRIBL_API_URL }}
+          CRIBL_GROUP: ${{ vars.CRIBL_GROUP }}
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}

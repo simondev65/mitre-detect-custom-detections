@@ -1,0 +1,26 @@
+title: IAM Access Key Created
+id: 90b73231-5663-46ec-aa2a-5742e4538c1f
+status: test
+description: |
+    A new long-lived IAM access key. Attackers with IAM permissions add keys to existing users to keep
+    access. Most organisations issue keys through automation, so a manual one is worth a look.
+references:
+    - https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateAccessKey.html
+author: Example SOC
+date: 2026-10-12
+tags:
+    - attack.persistence
+    - attack.t1098.001
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: iam.amazonaws.com
+        eventName: CreateAccessKey
+    filter_automation:
+        userIdentity.arn|contains: 'role/key-rotation/'
+    condition: selection and not filter_automation
+falsepositives:
+    - Key rotation outside the key-rotation role
+level: medium

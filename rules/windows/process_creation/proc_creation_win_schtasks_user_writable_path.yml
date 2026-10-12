@@ -1,0 +1,29 @@
+title: Scheduled Task Created That Runs From a User-Writable Path
+id: 560a0944-263f-49e1-8d98-942528a968d5
+status: test
+description: schtasks.exe /create with a task action under AppData, Users\Public, ProgramData or Temp.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-create
+author: Example SOC
+date: 2026-10-12
+tags:
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\schtasks.exe'
+    selection_create:
+        CommandLine|contains: '/create'
+    selection_path:
+        CommandLine|contains:
+            - '\AppData\'
+            - '\Users\Public\'
+            - '\ProgramData\'
+            - '\Temp\'
+    condition: all of selection_*
+falsepositives:
+    - Software updaters that install per-user tasks
+level: high

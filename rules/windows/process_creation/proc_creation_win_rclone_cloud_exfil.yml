@@ -1,0 +1,37 @@
+title: Rclone Copy or Sync to a Cloud Storage Remote
+id: a5b5c7b1-3a33-4711-87d5-3c0e1d9b2775
+status: test
+description: |
+    Rclone copying or syncing local data to a cloud storage remote. Ransomware crews use rclone to
+    stage data out before encryption. Tune the filter to the hosts that run sanctioned backups.
+references:
+    - https://rclone.org/commands/rclone_copy/
+author: Example SOC
+date: 2026-10-12
+tags:
+    - attack.exfiltration
+    - attack.t1567.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\rclone.exe'
+    selection_cmd:
+        CommandLine|contains:
+            - ' copy '
+            - ' sync '
+            - ' move '
+    selection_remote:
+        CommandLine|contains:
+            - 'mega:'
+            - 's3:'
+            - 'dropbox:'
+            - 'pcloud:'
+            - 'gdrive:'
+    filter_backup_host:
+        ParentImage|endswith: '\backupagent.exe'
+    condition: all of selection_* and not filter_backup_host
+falsepositives:
+    - Sanctioned backup jobs that use rclone
+level: high

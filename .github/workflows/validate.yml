@@ -1,0 +1,13 @@
+# Pull requests: compile every rule and run its tests. Nothing is sent to Cribl.
+name: validate detections
+on:
+  pull_request:
+    paths: ['rules/**', 'tests/**', 'mitre-detect.yml']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npx --yes mitre-detect-sync@1 check --repo .

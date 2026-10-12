@@ -1,0 +1,22 @@
+# Native rule format (same as the pack's rules/*.yml): OCSF field -> value, with |modifiers.
+# Use it for log sources the Sigma converter does not map yet. Tests live inline.
+rules:
+  - id: lnx_authorized_keys_append
+    title: Key appended to an SSH authorized_keys file from a shell
+    technique_id: T1098.004
+    technique_name: SSH Authorized Keys
+    tactic_id: TA0003
+    tactic_name: Persistence
+    class_uid: 1007
+    severity: high
+    fidelity: medium
+    suppression_sec: 900
+    match:
+      device.os.type: linux
+      process.cmd_line|contains: '.ssh/authorized_keys'
+      process.cmd_line|re: '(>>|tee\s+-a)'
+    tests:
+      pos:
+        - {process.name: bash, process.cmd_line: 'bash -c "echo ssh-ed25519 AAAAC3Nza attacker >> /root/.ssh/authorized_keys"', device.os.type: Linux}
+      neg:
+        - {process.name: cat, process.cmd_line: 'cat /home/a.jansen/.ssh/authorized_keys', device.os.type: Linux}

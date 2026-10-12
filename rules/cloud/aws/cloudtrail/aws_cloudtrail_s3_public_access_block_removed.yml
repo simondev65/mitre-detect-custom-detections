@@ -1,0 +1,24 @@
+title: S3 Public Access Block Removed
+id: 7ef3162a-e302-4017-954d-dc45292844dd
+status: stable
+description: The S3 Block Public Access setting was deleted from a bucket or the account, which can expose data.
+references:
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+author: Example SOC
+date: 2026-10-12
+tags:
+    - attack.collection
+    - attack.t1530
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: s3.amazonaws.com
+        eventName:
+            - DeleteBucketPublicAccessBlock
+            - DeleteAccountPublicAccessBlock
+    condition: selection
+falsepositives:
+    - Buckets that host a public website by design
+level: high

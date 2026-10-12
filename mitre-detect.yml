@@ -1,0 +1,31 @@
+# Detection source manifest, read by MITRE Detect Manager and the mitre-detect-sync CLI.
+# Only this file is required; everything else has a default.
+schema: 1
+
+# Short, unique per source. Rule ids become c_<source_id>_<id> so they cannot collide with the
+# pack's own rules or with another source. Lowercase letters, digits and underscores.
+source_id: example_soc
+
+# Files to read, relative to the repo root. Sigma rules are recognised by `logsource` + `detection`;
+# native rules by a top-level `rules:` list.
+include:
+  - rules/**/*.yml
+exclude: []
+
+# Sigma rules outside these levels or statuses are listed as filtered, not compiled.
+sigma:
+  levels: [medium, high, critical]
+  status: [stable, test]
+
+# Sigma has no test format, so tests for Sigma rules live here, keyed by Sigma id.
+tests:
+  - tests/*.yml
+
+# Applied to every rule that does not set its own value. Activation and suppression edits made
+# in the app are kept across syncs.
+defaults:
+  activation: auto
+  suppression_sec: 300
+
+# Written into the catalog's attribution column and carried on signals as mitre_attribution.
+license: Apache-2.0
