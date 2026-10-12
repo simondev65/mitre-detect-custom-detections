@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npx --yes mitre-detect-sync@1 apply --repo . --group "$CRIBL_GROUP" --deploy
+      - run: node .mitre-detect/mitre-detect-sync.mjs apply --repo . --group "$CRIBL_GROUP" --deploy
         env:
           CRIBL_API_URL: ${{ vars.CRIBL_API_URL }}
           CRIBL_GROUP: ${{ vars.CRIBL_GROUP }}

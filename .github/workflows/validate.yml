@@ -10,4 +10,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npx --yes mitre-detect-sync@1 check --repo .
+      - run: node .mitre-detect/mitre-detect-sync.mjs check --repo .

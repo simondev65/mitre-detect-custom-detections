@@ -11,6 +11,7 @@ rules/cloud/aws/cloudtrail/         Sigma: AWS CloudTrail -> OCSF 6003 / 3002
 rules/native/                       native OCSF rules (any class), tests inline
 tests/sigma.yml                     test events for the Sigma rules, keyed by Sigma id
 .github/workflows/                  validate on pull request, sync on push to main
+.mitre-detect/mitre-detect-sync.mjs the sync CLI, bundled (Node 20+, no dependencies)
 ```
 
 | Rule | Format | ATT&CK |
@@ -22,8 +23,9 @@ tests/sigma.yml                     test events for the Sigma rules, keyed by Si
 | S3 Public Access Block Removed | Sigma | T1530 |
 | Key appended to an SSH authorized_keys file from a shell | native | T1098.004 |
 
-*IAM Access Key Created* overlaps the pack's built-in `aws_iam_access_key_created` on purpose. It
-shows how the sync preview reports overlaps with rules you already have.
+*Rclone Copy or Sync to a Cloud Storage Remote* overlaps the pack's built-in SigmaHQ rule
+*PUA - Rclone Execution* (`sigma_e37db05dd1f9`): its positive test event fires both. The sync
+preview lists such overlaps so you can decide whether to keep both.
 
 ## Rules
 
@@ -36,8 +38,27 @@ shows how the sync preview reports overlaps with rules you already have.
 - **Tests:** every rule needs at least one positive and one negative event. If a rule's tests
   fail, the whole sync stops and nothing is written to Cribl.
 
+## Checking rules locally
+
+```bash
+node .mitre-detect/mitre-detect-sync.mjs check --repo .
+```
+
+It compiles every rule, runs its tests and lists skipped rules, without contacting Cribl. Exit code
+1 means a rule is invalid or a test failed.
+
 ## Connecting it
 
-In the app, open **Settings → Detection sources → Add source**. Enter the clone URL with a
-read-only token, for example `https://x-access-token:<token>@github.com/acme/detections.git`,
-and the branch. The full guide is in the main repo at `docs/custom-detections.md`.
+- **From the app:** open **Settings → Detection sources → Add source**. Enter the clone URL with
+  a read-only token, for example `https://x-access-token:<token>@github.com/acme/detections.git`,
+  and the branch. The app checks for updates and you apply them on the Changes page.
+- **From CI:** set the repository variables `CRIBL_API_URL` and `CRIBL_GROUP` and the secrets
+  `CRIBL_CLIENT_ID` and `CRIBL_CLIENT_SECRET`. `.github/workflows/sync.yml` then applies every
+  push to `main` and deploys it. Set the source to CI mode in the app, so the app only watches.
+
+Either way, the app shows the source's status, and its rules appear in the ATT&CK matrix, the
+rule table and signals like the built-in ones.
+
+The full guide is
+[docs/custom-detections.md](https://github.com/wvdlinde-cribl/cribl-mitre-detect/blob/main/docs/custom-detections.md)
+in the main repo.
